@@ -1,7 +1,3 @@
-// Catálogo de la tienda «Lo quieres, te lo vendo».
-// En un proyecto real estos datos vendrían de una API; aquí van en un archivo
-// para que la clase se concentre en las rutas y no en el backend.
-
 export const productos = [
   {
     id: 1,
@@ -13,6 +9,7 @@ export const productos = [
       'Audífonos bluetooth con cancelación pasiva de ruido y 24 horas de autonomía con el estuche de carga.',
     emoji: '🎧',
   },
+
   {
     id: 2,
     nombre: 'Parlante portátil Roca',
@@ -23,6 +20,7 @@ export const productos = [
       'Parlante resistente a salpicaduras, con correa de transporte y 10 horas de reproducción continua.',
     emoji: '🔊',
   },
+
   {
     id: 3,
     nombre: 'Teclado mecánico Cordillera',
@@ -33,6 +31,7 @@ export const productos = [
       'Teclado mecánico de 87 teclas, distribución en español latinoamericano e iluminación regulable.',
     emoji: '⌨️',
   },
+
   {
     id: 4,
     nombre: 'Mouse ergonómico Pehuén',
@@ -43,6 +42,7 @@ export const productos = [
       'Mouse vertical inalámbrico que reduce la tensión de la muñeca en jornadas largas de trabajo.',
     emoji: '🖱️',
   },
+
   {
     id: 5,
     nombre: 'Monitor 27" Atacama',
@@ -53,6 +53,7 @@ export const productos = [
       'Monitor IPS de 27 pulgadas, resolución QHD y 100 Hz de refresco. Incluye soporte regulable en altura.',
     emoji: '🖥️',
   },
+
   {
     id: 6,
     nombre: 'Lámpara de escritorio Aurora',
@@ -63,6 +64,7 @@ export const productos = [
       'Lámpara LED con tres temperaturas de color y puerto USB para cargar el teléfono.',
     emoji: '💡',
   },
+
   {
     id: 7,
     nombre: 'Silla de escritorio Valle',
@@ -73,6 +75,7 @@ export const productos = [
       'Silla ergonómica con apoyo lumbar regulable y respaldo de malla transpirable.',
     emoji: '🪑',
   },
+
   {
     id: 8,
     nombre: 'Cámara web Mirador HD',
@@ -85,19 +88,26 @@ export const productos = [
   },
 ]
 
-// Utilidad usada por varias páginas: formatea un número como precio chileno.
 export function formatearPrecio(valor) {
-  return valor.toLocaleString('es-CL', {
-    style: 'currency',
-    currency: 'CLP',
-    maximumFractionDigits: 0,
-  })
+  return valor.toLocaleString(
+    'es-CL',
+    {
+      style: 'currency',
+      currency: 'CLP',
+      maximumFractionDigits: 0,
+    },
+  )
 }
 
-// Devuelve un producto por su id. Ojo: el id que entrega useParams es texto,
-// por eso comparamos con Number().
 export function buscarProducto(id) {
-  return productos.find((producto) => producto.id === Number(id))
+  return productos.find(
+    (producto) =>
+      producto.id === Number(id),
+  )
 }
 
-export const categorias = ['audio', 'computacion', 'hogar']
+export const categorias = [
+  'audio',
+  'computacion',
+  'hogar',
+]

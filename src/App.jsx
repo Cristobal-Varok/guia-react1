@@ -1,101 +1,164 @@
-import { useState } from 'react'
-import Alert from 'react-bootstrap/Alert'
-import Button from 'react-bootstrap/Button'
-import Col from 'react-bootstrap/Col'
-import Container from 'react-bootstrap/Container'
-import Nav from 'react-bootstrap/Nav'
-import Navbar from 'react-bootstrap/Navbar'
-import Row from 'react-bootstrap/Row'
+import { useEffect, useState } from 'react'
+import { Route, Routes } from 'react-router'
 
-import TarjetaProducto from './componentes/TarjetaProducto.jsx'
-import { buscarProducto, productos } from './datos/productos.js'
+import Layout from './componentes/Layout.jsx'
 
-// ETAPA 1 — El problema que React Router viene a resolver.
-//
-// Esta versión funciona: se puede ver el catálogo y el detalle de un producto.
-// Pero toda la aplicación vive en una sola URL. Eso significa que:
-//   · no se puede compartir el enlace de un producto,
-//   · el botón "atrás" del navegador se sale del sitio,
-//   · al recargar (F5) siempre volvemos al catálogo,
-//   · no se puede marcar una sección como favorita.
-//
-// La "navegación" está simulada con una variable de estado.
+import Inicio from './paginas/Inicio.jsx'
+import Catalogo from './paginas/Catalogo.jsx'
+import Nosotros from './paginas/Nosotros.jsx'
+import DetalleProducto from './paginas/DetalleProducto.jsx'
+import Carrito from './paginas/Carrito.jsx'
+import Checkout from './paginas/Checkout.jsx'
+import NoEncontrada from './paginas/NoEncontrada.jsx'
+
+function leerCarritoGuardado() {
+  try {
+    const guardado = localStorage.getItem('lqtlv-carrito')
+
+    return guardado ? JSON.parse(guardado) : []
+  } catch {
+    return []
+  }
+}
+
 export default function App() {
-  const [vista, setVista] = useState('catalogo')
-  const [idSeleccionado, setIdSeleccionado] = useState(null)
+  const [carrito, setCarrito] = useState(leerCarritoGuardado)
 
-  const producto = buscarProducto(idSeleccionado)
+  // Guardar carrito en localStorage cada vez que cambie
+  useEffect(() => {
+    localStorage.setItem(
+      'lqtlv-carrito',
+      JSON.stringify(carrito),
+    )
+  }, [carrito])
+
+  // Agregar producto
+  function agregarAlCarrito(producto) {
+    setCarrito((actual) => {
+      const existe = actual.find(
+        (item) => item.id === producto.id,
+      )
+
+      if (existe) {
+        return actual.map((item) =>
+          item.id === producto.id
+            ? {
+                ...item,
+                cantidad: item.cantidad + 1,
+              }
+            : item,
+        )
+      }
+
+      return [
+        ...actual,
+        {
+          ...producto,
+          cantidad: 1,
+        },
+      ]
+    })
+  }
+
+  // Cambiar cantidad
+  function cambiarCantidad(id, cantidad) {
+    if (cantidad < 1) {
+      quitarDelCarrito(id)
+      return
+    }
+
+    setCarrito((actual) =>
+      actual.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              cantidad,
+            }
+          : item,
+      ),
+    )
+  }
+
+  // Quitar producto
+  function quitarDelCarrito(id) {
+    setCarrito((actual) =>
+      actual.filter((item) => item.id !== id),
+    )
+  }
+
+  // Vaciar carrito
+  function vaciarCarrito() {
+    setCarrito([])
+  }
 
   return (
-    <div className="d-flex flex-column min-vh-100">
-      <Navbar expand="lg" bg="dark" data-bs-theme="dark" sticky="top">
-        <Container>
-          <Navbar.Brand href="#">Lo quieres, te lo vendo</Navbar.Brand>
-          <Navbar.Toggle aria-controls="menu-principal" />
-          <Navbar.Collapse id="menu-principal">
-            <Nav className="ms-auto">
-              <Nav.Link onClick={() => setVista('catalogo')}>Catálogo</Nav.Link>
-              <Nav.Link onClick={() => setVista('nosotros')}>Nosotros</Nav.Link>
-            </Nav>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
+    <Routes>
 
-      <main className="flex-grow-1 py-4">
-        <Container>
-          <Alert variant="warning">
-            Mira la barra de direcciones mientras navegas: <strong>nunca cambia</strong>.
-            Ese es el problema que resolveremos hoy.
-          </Alert>
+      {/* Layout general */}
+      <Route
+        path="/"
+        element={<Layout carrito={carrito} />}
+      >
 
-          {vista === 'nosotros' && (
-            <>
-              <h1 className="h3">Nosotros</h1>
-              <p>
-                Tienda en línea del Equipo 1 para la asignatura Desarrollo
-                Fullstack II.
-              </p>
-            </>
-          )}
+        {/* Inicio */}
+        <Route
+          index
+          element={<Inicio />}
+        />
 
-          {vista === 'detalle' && producto && (
-            <>
-              <Button
-                variant="outline-secondary"
-                className="mb-3"
-                onClick={() => setVista('catalogo')}
-              >
-                Volver
-              </Button>
-              <h1 className="h3">{producto.nombre}</h1>
-              <p>{producto.descripcion}</p>
-            </>
-          )}
+        {/* Catálogo */}
+        <Route
+          path="catalogo"
+          element={<Catalogo />}
+        />
 
-          {vista === 'catalogo' && (
-            <>
-              <h1 className="h3 mb-3">Catálogo</h1>
-              <Row xs={1} sm={2} lg={3} className="g-3">
-                {productos.map((item) => (
-                  <Col key={item.id}>
-                    <TarjetaProducto
-                      producto={item}
-                      onVerDetalle={() => {
-                        setIdSeleccionado(item.id)
-                        setVista('detalle')
-                      }}
-                    />
-                  </Col>
-                ))}
-              </Row>
-            </>
-          )}
-        </Container>
-      </main>
+        {/* Nosotros */}
+        <Route
+          path="nosotros"
+          element={<Nosotros />}
+        />
 
-      <footer className="bg-dark text-white-50 py-3">
-        <Container>&copy; 2026 Lo quieres, te lo vendo — Equipo 1</Container>
-      </footer>
-    </div>
+        {/* Detalle de producto */}
+        <Route
+          path="producto/:id"
+          element={
+            <DetalleProducto
+              onAgregar={agregarAlCarrito}
+            />
+          }
+        />
+
+        {/* Carrito */}
+        <Route
+          path="carrito"
+          element={
+            <Carrito
+              carrito={carrito}
+              onCambiarCantidad={cambiarCantidad}
+              onQuitar={quitarDelCarrito}
+              onVaciar={vaciarCarrito}
+            />
+          }
+        />
+
+        {/* Checkout */}
+        <Route
+          path="checkout"
+          element={
+            <Checkout
+              carrito={carrito}
+              onVaciar={vaciarCarrito}
+            />
+          }
+        />
+
+        {/* 404 */}
+        <Route
+          path="*"
+          element={<NoEncontrada />}
+        />
+
+      </Route>
+    </Routes>
   )
 }
